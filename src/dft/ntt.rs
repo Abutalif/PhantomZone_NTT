@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::dft::DFT;
 
 pub struct NttBuilder<O> {
@@ -8,22 +10,18 @@ pub struct NttBuilder<O> {
 #[derive(Debug)]
 pub enum Error {
     NoPrimaryRoot,
-    NotEvenN,
+    NotPowerOfTwoN,
 }
 
 impl<O> NttBuilder<O> {
-    pub fn new(q: O, n: usize)-> Self{
-        Self {
-            q,
-            n,
-        }
+    pub fn new(q: O, n: usize) -> Self {
+        Self { q, n }
     }
 }
 
-
 impl NttBuilder<u64> {
     pub fn build(self) -> Result<Table<u64>, Error> {
-        let psi = self.find_primitive_root();
+        let psi = self.find_nth_root(self.n as u64).expect("cannot find psi");
         Ok(Table {
             q: self.q,
             n: self.n,
@@ -34,10 +32,24 @@ impl NttBuilder<u64> {
         })
     }
 
-    fn find_primitive_root(&self) -> u64 {
-        todo!()
-    }
+    fn find_nth_root(&self, n: u64) -> Result<u64, Error> {
+        if !n.is_power_of_two() {
+            return Err(Error::NotPowerOfTwoN);
+        }
 
+        if (self.q - 1) % n != 0 {
+            return Err(Error::NoPrimaryRoot);
+        }
+
+        let mut rng = rand::thread_rng();
+
+        let exp = (self.q - 1) / n;
+
+        for _ in 0..n {
+            let num = rng.gen_range(1..self.q);
+        }
+        Ok(0)
+    }
 }
 
 pub struct Table<O> {
@@ -57,7 +69,7 @@ pub struct Table<O> {
 
 impl Default for Table<u64> {
     fn default() -> Self {
-        Self { 
+        Self {
             q: 0x1fffffffffe00001u64,
             psi: 0x15eb043c7aa2b01fu64,
             n: 16,
@@ -103,21 +115,21 @@ impl Table<u64> {
         let mut t = self.n;
         let q = self.q;
         let mut m = 1;
-        while m <t {
-            t = t/2; 
+        while m < t {
+            t = t / 2;
             for i in 0..m {
-                let j1 = 2*i*m;
-                let j2 = j1 + t  - 1;
-                let s = self.psi_pow[m+i];
-                // TODO: overflow and modulus handling 
+                let j1 = 2 * i * m;
+                let j2 = j1 + t - 1;
+                let s = self.psi_pow[m + i];
+                // TODO: overflow and modulus handling
                 for j in j1..=j2 {
                     let u = a[j];
-                    let v = a[j+t]*s;
-                    a[j] = (u+v)%q;
-                    a[j+t] = (u-v)%q;
+                    let v = a[j + t] * s;
+                    a[j] = (u + v) % q;
+                    a[j + t] = (u - v) % q;
                 }
             }
-            m = m*2;
+            m = m * 2;
         }
     }
     fn backward_inplace_core<const LAZY: bool>(&self, a: &mut [u64]) {}
