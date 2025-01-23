@@ -1,4 +1,6 @@
-pub(crate) trait ModOps: Copy + Sized {
+use std::ops::{Add, Mul, Sub, Div};
+
+pub(crate) trait ModOps: Add<Output = Self> + Mul<Output = Self> + Sub<Output = Self> + Div<Output = Self> + Copy + Sized {
     fn mod_add(self, rhs: Self, modulus: Self) -> Self;
     fn mod_mul(self, rhs: Self, modulus: Self) -> Self;
     fn mod_sub(self, rhs: Self, modulus: Self) -> Self;
