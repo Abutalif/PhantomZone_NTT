@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul, Sub, Div};
 
-pub(crate) trait ModOps: Add<Output = Self> + Mul<Output = Self> + Sub<Output = Self> + Div<Output = Self> + Copy + Sized {
+pub trait ModOps: Add<Output = Self> + Mul<Output = Self> + Sub<Output = Self> + Div<Output = Self> + Copy + Sized {
     fn mod_add(self, rhs: Self, modulus: Self) -> Self;
     fn mod_mul(self, rhs: Self, modulus: Self) -> Self;
     fn mod_sub(self, rhs: Self, modulus: Self) -> Self;
@@ -14,10 +14,10 @@ impl ModOps for u64 {
             modulus <= 1 << 61,
             "prime q must be smaller or equal to 2^61"
         );
-        assert!(
-            self < modulus && rhs < modulus,
-            "Elements in the ring Z_q must be smaller than q"
-        );
+        // assert!(
+        //     self < modulus && rhs < modulus,
+        //     "Elements in the ring Z_q must be smaller than q"
+        // );
 
         ((self as u128 + rhs as u128) % modulus as u128) as u64
     }
@@ -27,11 +27,13 @@ impl ModOps for u64 {
             modulus <= 1 << 61,
             "prime q must be smaller or equal to 2^61"
         );
-        assert!(
-            self < modulus && rhs < modulus,
-            "Elements in Zq ring must be smaller than q"
-        );
-        // TODO: add early return for small numbers.
+        // assert!(
+        //     self < modulus && rhs < modulus,
+        //     "Elements in Zq ring must be smaller than q"
+        // );
+        if self <= 1<<32 && rhs <= 1<<32 {
+            return (self * rhs) % modulus;
+        }
 
         // Russian peasant multiplication
         let mut a = self as u128;
@@ -46,7 +48,7 @@ impl ModOps for u64 {
             a *= 2;
             b /= 2;
         }
-        res as u64
+        (res%q) as u64
     }
 
     fn mod_sub(self, rhs: Self, modulus: Self) -> Self {
@@ -54,12 +56,13 @@ impl ModOps for u64 {
             modulus <= 1 << 61,
             "prime q must be smaller or equal to 2^61"
         );
-        assert!(
-            self < modulus && rhs < modulus,
-            "Elements in the ring Z_q must be smaller than q"
-        );
-
+        // assert!(
+        //     self < modulus && rhs < modulus,
+        //     "Elements in the ring Z_q must be smaller than q"
+        // );
         (self + modulus - rhs) % modulus
+        // let temp = self.wrapping_sub(rhs);
+        // (temp.min(self.wrapping_add(modulus))) % modulus
     }
 
     fn mod_exp(self, exp: Self, modulus: Self) -> Self {
