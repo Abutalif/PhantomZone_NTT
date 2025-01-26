@@ -1,18 +1,20 @@
 1. Tests
-    1. Forward - Inverse check.
-        1. Known numbers - Lazy.
-        2. Known numbers - Greedy.
-        3. Random set - Lazy.
-        4. Random set - Greedy.
+    1. [DONE] Forward - Inverse check.
+        [DONE] 1. Known numbers - Lazy.
+        [DONE] 2. Known numbers - Greedy.
+        [DONE] 3. Random set - Lazy.
+        [DONE] 4. Random set - Greedy.
     2. Polynomial multiplication.
-        1. Known numbers - Lazy.
-        2. Known numbers - Greedy.
+        [DONE] 1. Known numbers - Lazy.
+        [DONE] 2. Known numbers - Greedy.
         3. Random set - Lazy.
         4. Random set - Greedy.
+        5. Schoolbook modular multiplication.
     3. Internal structure check.
         1. Check for ring integrity (every value < prime modulus).
         2. Looking for primitive roots.
-        3. Modulus operations.
+        3. Modular operations.
+    4. Add test for default.
 
 2. Benchmarking: The same as tests, but aligned to provided benchmarking criterions.
 
@@ -26,8 +28,10 @@
     1. 
 
 6. README - Explain what you have done, what resources used, why chose certain implementations.
+    1. Add used papers.
 
 7. Refactoring:
     1. Restructure modules.
     2. Add "assert!()" where needed - modulus ops, builder, etc.
     3. Separate butterfly logic.
+    4. Implement default.
