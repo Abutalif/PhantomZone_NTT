@@ -22,32 +22,19 @@ impl<O> NttBuilder<O> {
 
 impl NttBuilder<u64> {
     pub fn build(self) -> Result<Table<u64>, Error> {
+        let q = self.q;
+        let n = self.n;
+        
         let psi = self.find_nth_root( 2*self.n as u64).expect("cannot find psi");
-        let psi_inv = psi.mod_inv(self.q);
-        let mut psi_pow = vec![0; self.n];
-        let mut psi_inv_pow = vec![0; self.n];
+        let inv_psi = psi.mod_inv(self.q);
 
-        assert_eq!(psi.mod_exp(2*self.n as u64, self.q), 1);
-        assert_eq!((psi as u128 * psi_inv as u128) % self.q as u128, 1);
-
-        let mut temp_psi = 1;
-        let mut temp_inv_psi = 1;
-        let bit_start = self.n.leading_zeros()+1;
-
-        for i in 0..self.n {
-            let index = i.reverse_bits() >> bit_start;
-            psi_pow[index] = temp_psi;
-            psi_inv_pow[index] = temp_inv_psi;
-            
-            temp_psi = temp_psi.mod_mul(psi, self.q);
-            temp_inv_psi = temp_inv_psi.mod_mul(psi_inv, self.q);
-        }
+        let (psi_pow, psi_inv_pow) = calculate_wiggle(psi, inv_psi, q, n);
         
         Ok(Table {
-            q: self.q,
-            n: self.n,
-            psi_pow: psi_pow.into_boxed_slice(),
-            psi_inv_pow: psi_inv_pow.into_boxed_slice(),
+            q,
+            n,
+            psi_pow,
+            psi_inv_pow,
         })
     }
 
@@ -65,10 +52,8 @@ impl NttBuilder<u64> {
         let exp = (self.q - 1) / n;
 
         for _ in 0..n {
-            let num = rng.gen_range(1..self.q);
+            let num = rng.gen_range(1..self.q).mod_exp(exp, self.q);
             
-            let num = num.mod_exp(exp, self.q);
-
             if num.mod_exp(n/2, self.q) != 1 {
                 return Ok(num);
             }
@@ -92,15 +77,42 @@ pub struct Table<O> {
 impl Default for Table<u64> {
     fn default() -> Self {
         let q = 0x1fffffffffe00001u64;
-        let _psi = 0x15eb043c7aa2b01fu64;
+        let psi = 0x15eb043c7aa2b01fu64;
         let n = 16;
+
+        let inv_psi = psi.mod_inv(q);
+
+        let (psi_pow, psi_inv_pow) = calculate_wiggle(psi, inv_psi, q, n);
+
         Self {
             q,
             n,
-            psi_pow: todo!(),
-            psi_inv_pow: todo!(),
+            psi_pow,
+            psi_inv_pow,
         }
     }
+}
+
+/// Calculates wiggle factor values.
+/// Returns a tupple: (boxed slice of powers of psi, boxed slice of powers of inverse psi)
+fn calculate_wiggle(psi:u64, inv_psi: u64, q: u64, n: usize) -> (Box<[u64]>,Box<[u64]>) {
+    let mut psi_pow = vec![0; n];
+    let mut psi_inv_pow = vec![0; n];
+
+    let mut temp_psi = 1;
+    let mut temp_inv_psi = 1;
+    let bit_start = n.leading_zeros()+1;
+
+    for i in 0..n {
+        let index = i.reverse_bits() >> bit_start;
+        psi_pow[index] = temp_psi;
+        psi_inv_pow[index] = temp_inv_psi;
+        
+        temp_psi = temp_psi.mod_mul(psi, q);
+        temp_inv_psi = temp_inv_psi.mod_mul(inv_psi, q);
+    }
+
+    (psi_pow.into_boxed_slice(), psi_inv_pow.into_boxed_slice())
 }
 
 impl DFT<u64> for Table<u64> {
@@ -313,7 +325,52 @@ mod tests {
         }
     }
 
-    fn manual_polynomial_mod_mul(){
+    fn _manual_polynomial_mod_mul(){
         // TODO
+    }
+
+    /// Test for the provided NTT friendly prime and its 2^17-th primitive root to uphold `a == INTT(NTT(a))`.
+    /// Uses a randomly generated polynomial.
+    #[test]
+    fn self_inverse_default_ntt() {
+        let ntt = Table::default();
+        let q = ntt.q;
+        let n = ntt.n;
+
+        let mut rng = thread_rng();
+        let mut b = vec![0u64; n].into_boxed_slice();
+
+        for el in b.iter_mut() {
+            *el = rng.gen_range(0..q);
+        }
+
+        let b_clone = b.clone();
+        ntt.forward_inplace_lazy(&mut b);
+        ntt.backward_inplace_lazy(&mut b);
+
+        assert_eq!(b, b_clone);
+    }
+
+    /// Test for polynomial multiplication using the provided NTT friendly prime and its 2^17-th primitive root.
+    /// Uses randomly generated polynomials of 15-th degree.
+    #[test]
+    #[ignore]
+    fn polynomial_mul_default_ntt() {
+        let ntt = Table::default();
+        let q = ntt.q;
+        let _n = ntt.n;
+
+        let mut a = vec![1u64,2,3,4];
+        let mut b = vec![5u64,6,7,8];
+        let manual = vec![7625u64, 7645, 2, 60];
+        
+        ntt.forward_inplace(&mut a);
+        ntt.forward_inplace(&mut b);
+        
+        elementwise_mod_mul(&mut a, &mut b, q);
+
+        ntt.backward_inplace(&mut a);
+
+        assert_eq!(manual, a);
     }
 }

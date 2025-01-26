@@ -1,4 +1,5 @@
 fn main() {
+    
     // Special prime
     let spec_q:u64 = ((((1 << 63) - (1 << 31)))<<1) + 1;
     let spec_bit = 0xffffffff00000001u64;
