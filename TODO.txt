@@ -1,12 +1,12 @@
 1. Tests
     1. [DONE] Forward - Inverse check.
-        [DONE] 1. Known numbers - Lazy.
-        [DONE] 2. Known numbers - Greedy.
-        [DONE] 3. Random set - Lazy.
-        [DONE] 4. Random set - Greedy.
+        1. [DONE] Known numbers - Lazy.
+        2. [DONE] Known numbers - Greedy.
+        3. [DONE] Random set - Lazy.
+        4. [DONE] Random set - Greedy.
     2. Polynomial multiplication.
-        [DONE] 1. Known numbers - Lazy.
-        [DONE] 2. Known numbers - Greedy.
+        1. [DONE] Known numbers - Lazy.
+        2. [DONE] Known numbers - Greedy.
         3. Random set - Lazy.
         4. Random set - Greedy.
         5. Schoolbook modular multiplication.
@@ -15,6 +15,8 @@
         2. Looking for primitive roots.
         3. Modular operations.
     4. Add test for default.
+        1. Polynomial multiplication.
+        2. [DONE] Forward - Inverse check.
 
 2. Benchmarking: The same as tests, but aligned to provided benchmarking criterions.
 
@@ -34,4 +36,4 @@
     1. Restructure modules.
     2. Add "assert!()" where needed - modulus ops, builder, etc.
     3. Separate butterfly logic.
-    4. Implement default.
+    4. [DONE] Implement default.
