@@ -7,9 +7,9 @@
     2. Polynomial multiplication.
         1. [DONE] Known numbers - Lazy.
         2. [DONE] Known numbers - Greedy.
-        3. Random set - Lazy.
-        4. Random set - Greedy.
-        5. Schoolbook modular multiplication.
+        3. [DONE] Random set - Lazy.
+        4. [DONE] Random set - Greedy.
+        5. [DONE] Schoolbook formula negacyclic multiplication.
     3. Internal structure check.
         1. Check for ring integrity (every value < prime modulus).
         2. Looking for primitive roots.
@@ -37,3 +37,5 @@
     2. Add "assert!()" where needed - modulus ops, builder, etc.
     3. Separate butterfly logic.
     4. [DONE] Implement default.
+    5. Add length check for polynomials.
+    6. N different random nums for primary root search.
