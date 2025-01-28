@@ -61,3 +61,8 @@ impl ModOps for u64 {
         self.mod_exp(modulus - 2, modulus)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+}
