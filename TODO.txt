@@ -18,7 +18,7 @@
         1. [DONE] Polynomial multiplication.
         2. [DONE] Forward - Inverse check.
 
-2. Benchmarking: The same as tests, but aligned to provided benchmarking criterions.
+2. [DONE] Benchmarking: The same as tests, but aligned to provided benchmarking criterions.
 
 3. [DONE] Lazy-calculation (2q) optimization:
 
