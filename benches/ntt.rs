@@ -7,7 +7,9 @@ fn forward_inplace(c: &mut Criterion) {
         let q = 0x1fffffffffe00001u64;
         let n = 1usize << log_n;
         // let ntt_table: Table<u64> = Table::<u64>::new();
-        let ntt_table = NttBuilder::new(q, n).build().expect("Failed to create Table");
+        let ntt_table = NttBuilder::new(q, n)
+            .build()
+            .expect("Failed to create Table");
         let mut a: Vec<u64> = vec![0; n];
         for i in 0..a.len() {
             a[i] = i as u64;
@@ -33,7 +35,9 @@ fn reverse_forwarded(c: &mut Criterion) {
         let q = 0x1fffffffffe00001u64;
         let n = 1usize << log_n;
         // let ntt_table: Table<u64> = Table::<u64>::new();
-        let ntt_table = NttBuilder::new(q, n).build().expect("Failed to create Table");
+        let ntt_table = NttBuilder::new(q, n)
+            .build()
+            .expect("Failed to create Table");
         let mut a: Vec<u64> = vec![0; n];
         for i in 0..a.len() {
             a[i] = i as u64;

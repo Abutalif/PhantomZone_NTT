@@ -24,12 +24,14 @@ impl NttBuilder<u64> {
     pub fn build(self) -> Result<Table<u64>, Error> {
         let q = self.q;
         let n = self.n;
-        
-        let psi = self.find_nth_root( 2*self.n as u64).expect("cannot find psi");
+
+        let psi = self
+            .find_nth_root(2 * self.n as u64)
+            .expect("cannot find psi");
         let inv_psi = psi.mod_inv(self.q);
 
         let (psi_pow, psi_inv_pow) = calculate_wiggle(psi, inv_psi, q, n);
-        
+
         Ok(Table {
             q,
             n,
@@ -53,8 +55,8 @@ impl NttBuilder<u64> {
 
         for _ in 0..n {
             let num = rng.gen_range(1..self.q).mod_exp(exp, self.q);
-            
-            if num.mod_exp(n/2, self.q) != 1 {
+
+            if num.mod_exp(n / 2, self.q) != 1 {
                 return Ok(num);
             }
         }
@@ -78,7 +80,7 @@ impl Default for Table<u64> {
     fn default() -> Self {
         let q = 0x1fffffffffe00001u64;
         let psi = 0x15eb043c7aa2b01fu64;
-        let n = 1<<16;
+        let n = 1 << 16;
 
         let inv_psi = psi.mod_inv(q);
 
@@ -95,19 +97,19 @@ impl Default for Table<u64> {
 
 /// Calculates wiggle factor values.
 /// Returns a tupple: (boxed slice of powers of psi, boxed slice of powers of inverse psi)
-fn calculate_wiggle(psi:u64, inv_psi: u64, q: u64, n: usize) -> (Box<[u64]>,Box<[u64]>) {
+fn calculate_wiggle(psi: u64, inv_psi: u64, q: u64, n: usize) -> (Box<[u64]>, Box<[u64]>) {
     let mut psi_pow = vec![0; n];
     let mut psi_inv_pow = vec![0; n];
 
     let mut temp_psi = 1;
     let mut temp_inv_psi = 1;
-    let bit_start = n.leading_zeros()+1;
+    let bit_start = n.leading_zeros() + 1;
 
     for i in 0..n {
         let index = i.reverse_bits() >> bit_start;
         psi_pow[index] = temp_psi;
         psi_inv_pow[index] = temp_inv_psi;
-        
+
         temp_psi = temp_psi.mod_mul(psi, q);
         temp_inv_psi = temp_inv_psi.mod_mul(inv_psi, q);
     }
@@ -147,8 +149,8 @@ impl DFT<u64> for Table<u64> {
 
 impl Table<u64> {
     fn forward_inplace_core<const LAZY: bool>(&self, a: &mut [u64]) {
-        let q = if LAZY {2 * self.q} else {self.q};
-        
+        // let q = if LAZY {2 * self.q} else {self.q};
+        let q = self.q;
         let mut t = self.n;
         let mut m = 1;
 
@@ -167,34 +169,35 @@ impl Table<u64> {
             }
             m = m * 2;
         }
-        if LAZY {
-            for i in 0..self.n{
-                a[i] = a[i]%q;
-            }
-        }
+        // if LAZY {
+        //     for i in 0..self.n{
+        //         a[i] = a[i]%q;
+        //     }
+        // }
     }
 
     fn backward_inplace_core<const LAZY: bool>(&self, a: &mut [u64]) {
-        let q = if LAZY {2 * self.q} else {self.q};
+        // let q = if LAZY {2 * self.q} else {self.q};
+        let q = self.q;
 
         let mut t = 1;
         let mut m = self.n;
 
         while m > 1 {
             let mut j1 = 0;
-            let h = m/2;
+            let h = m / 2;
             for i in 0..h {
-                let j2 = j1 + t -1;
-                let s = self.psi_inv_pow[h+i];
+                let j2 = j1 + t - 1;
+                let s = self.psi_inv_pow[h + i];
                 for j in j1..=j2 {
                     let u = a[j];
-                    let v = a[j+t];
-                    a[j] = u.mod_add(v,q);
-                    a[j+t] = u.mod_sub(v, q).mod_mul(s, q);
+                    let v = a[j + t];
+                    a[j] = u.mod_add(v, q);
+                    a[j + t] = u.mod_sub(v, q).mod_mul(s, q);
                 }
-                j1 += 2*t;
+                j1 += 2 * t;
             }
-            t *=2;
+            t *= 2;
             m /= 2;
         }
 

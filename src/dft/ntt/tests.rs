@@ -9,17 +9,17 @@ fn elementwise_mod_mul(a: &mut [u64], b: &mut [u64], q: u64) {
     }
 }
 
-/// Negacyclic convolution of polynomials *a* and *b*. 
+/// Negacyclic convolution of polynomials *a* and *b*.
 fn manual_negacyclic_convolution(a: &[u64], b: &[u64], q: u64) -> Vec<u64> {
     let n = a.len();
     let mut res = vec![0; n];
     for k in 0..n {
         for i in 0..=k {
-            res[k] = res[k].mod_add(a[i].mod_mul(b[k-i], q), q);
-        } 
+            res[k] = res[k].mod_add(a[i].mod_mul(b[k - i], q), q);
+        }
 
-        for i in k+1..n {
-            res[k] = res[k].mod_sub(a[i].mod_mul(b[k+n-i], q), q);
+        for i in k + 1..n {
+            res[k] = res[k].mod_sub(a[i].mod_mul(b[k + n - i], q), q);
         }
     }
 
@@ -34,7 +34,7 @@ fn forward_reverse_known_lazy() {
     let ntt = NttBuilder::new(q, n).build().expect("Cannot build");
 
     // known element slice.
-    let mut a:Vec<u64> = (1..=n as u64).collect();
+    let mut a: Vec<u64> = (1..=n as u64).collect();
     let a_clone = a.clone();
 
     ntt.forward_inplace_lazy(&mut a);
@@ -51,7 +51,7 @@ fn forward_reverse_known_greedy() {
     let ntt = NttBuilder::new(q, n).build().expect("Cannot build");
 
     // known element slice.
-    let mut a:Vec<u64> = (1..=n as u64).collect();
+    let mut a: Vec<u64> = (1..=n as u64).collect();
     let a_clone = a.clone();
 
     ntt.forward_inplace(&mut a);
@@ -108,16 +108,15 @@ fn polynomial_mul_known_lazy() {
     let q = 7681;
     let n = 4;
     let ntt = NttBuilder::new(q, n).build().expect("Cannot build");
-    let mut a = vec![1u64,2,3,4];
-    let mut b = vec![5u64,6,7,8];
+    let mut a = vec![1u64, 2, 3, 4];
+    let mut b = vec![5u64, 6, 7, 8];
     let manual = vec![7625u64, 7645, 2, 60];
 
-    
     ntt.forward_inplace_lazy(&mut a);
     ntt.forward_inplace_lazy(&mut b);
 
     elementwise_mod_mul(&mut a, &mut b, q);
-    
+
     ntt.backward_inplace_lazy(&mut a);
 
     assert_eq!(manual, a);
@@ -129,13 +128,13 @@ fn polynomial_mul_known_greedy() {
     let q = 7681;
     let n = 4;
     let ntt = NttBuilder::new(q, n).build().expect("Cannot build");
-    let mut a = vec![1u64,2,3,4];
-    let mut b = vec![5u64,6,7,8];
+    let mut a = vec![1u64, 2, 3, 4];
+    let mut b = vec![5u64, 6, 7, 8];
     let manual = vec![7625u64, 7645, 2, 60];
-    
+
     ntt.forward_inplace(&mut a);
     ntt.forward_inplace(&mut b);
-    
+
     elementwise_mod_mul(&mut a, &mut b, q);
 
     ntt.backward_inplace(&mut a);
@@ -154,16 +153,16 @@ fn polynomial_mul_random_greedy() {
     let mut b = vec![0u64; n].into_boxed_slice();
     for i in 0..n {
         let a_i = rng.gen_range(0..q);
-        let b_i =rng.gen_range(0..q);
+        let b_i = rng.gen_range(0..q);
         a[i] = a_i;
         b[i] = b_i;
     }
 
     let c = manual_negacyclic_convolution(&a, &b, q).into_boxed_slice();
-    
+
     ntt.forward_inplace(&mut a);
     ntt.forward_inplace(&mut b);
-    
+
     elementwise_mod_mul(&mut a, &mut b, q);
 
     ntt.backward_inplace(&mut a);
@@ -176,22 +175,22 @@ fn polynomial_mul_random_lazy() {
     let q = 0x1fffffffffe00001u64;
     let n = 32;
     let ntt = NttBuilder::new(q, n).build().expect("Cannot build");
-    
+
     let mut rng = thread_rng();
     let mut a = vec![0u64; n].into_boxed_slice();
     let mut b = vec![0u64; n].into_boxed_slice();
     for i in 0..n {
         let a_i = rng.gen_range(0..q);
-        let b_i =rng.gen_range(0..q);
+        let b_i = rng.gen_range(0..q);
         a[i] = a_i;
         b[i] = b_i;
     }
 
     let c = manual_negacyclic_convolution(&a, &b, q).into_boxed_slice();
-    
+
     ntt.forward_inplace_lazy(&mut a);
     ntt.forward_inplace_lazy(&mut b);
-    
+
     elementwise_mod_mul(&mut a, &mut b, q);
 
     ntt.backward_inplace_lazy(&mut a);
@@ -234,16 +233,16 @@ fn polynomial_mul_default_ntt() {
     let mut b = vec![0u64; n].into_boxed_slice();
     for i in 0..n {
         let a_i = rng.gen_range(0..q);
-        let b_i =rng.gen_range(0..q);
+        let b_i = rng.gen_range(0..q);
         a[i] = a_i;
         b[i] = b_i;
     }
 
     let c = manual_negacyclic_convolution(&a, &b, q).into_boxed_slice();
-    
+
     ntt.forward_inplace(&mut a);
     ntt.forward_inplace(&mut b);
-    
+
     elementwise_mod_mul(&mut a, &mut b, q);
 
     ntt.backward_inplace(&mut a);
