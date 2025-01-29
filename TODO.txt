@@ -26,8 +26,7 @@
 
 5. Special Prime optimization.
 
-6. README - Explain what you have done, what resources used, why chose certain implementations.
-    1. Add used papers.
+6. [DONE] README - Explain what you have done, what resources used, why chose certain implementations.
 
 7. Refactoring:
     1. Restructure modules.
