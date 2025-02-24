@@ -35,3 +35,10 @@
     4. [DONE] Implement default.
     5. Add length check for polynomials.
     6. N different random nums for primary root search.
+
+
+FIXME:
+When doing lazy computation (within 2q), the transform does not work.
+
+TODO:
+Test out using unsafe uncheked slice element access.
